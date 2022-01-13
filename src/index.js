@@ -63,13 +63,19 @@ function trackMatomoPageView (options, to, from) {
   }
 
   if (referrerUrl) {
-    Matomo.setReferrerUrl(referrerUrl)
+    Matomo.forEach((tracker) => {
+      tracker.setReferrerUrl(referrerUrl)
+    });
   }
   if (url) {
-    Matomo.setCustomUrl(url)
+    Matomo.forEach((tracker) => {
+      tracker.setCustomUrl(url)
+    });
   }
 
-  Matomo.trackPageView(title)
+  Matomo.forEach((tracker) => {
+    tracker.trackPageView(title)
+  });
 }
 
 function initMatomo (Vue, options) {
@@ -78,12 +84,12 @@ function initMatomo (Vue, options) {
   const version = Number(Vue.version.split('.')[0])
 
   if (version > 2) {
-    Vue.config.globalProperties.$piwik = Matomo
-    Vue.config.globalProperties.$matomo = Matomo
-    Vue.provide(matomoKey, Matomo)
+    Vue.config.globalProperties.$piwik = Matomo[0]
+    Vue.config.globalProperties.$matomo = Matomo[0]
+    Vue.provide(matomoKey, Matomo[0])
   } else {
-    Vue.prototype.$piwik = Matomo
-    Vue.prototype.$matomo = Matomo
+    Vue.prototype.$piwik = Matomo[0]
+    Vue.prototype.$matomo = Matomo[0]
   }
 
   if (options.trackInitialView && options.router) {
@@ -102,7 +108,9 @@ function initMatomo (Vue, options) {
       trackUserInteraction(options, to, from)
 
       if (options.enableLinkTracking) {
-        Matomo.enableLinkTracking()
+        Matomo.forEach((tracker) => {
+          tracker.enableLinkTracking()
+        });
       }
     })
   }
@@ -177,7 +185,6 @@ export default function install (Vue, setupOptions = {}) {
   if (options.domains) {
     window._paq.push(['setDomains', options.domains])
   }
-
   options.preInitActions.forEach((action) => window._paq.push(action))
 
   loadScript(trackerScript)

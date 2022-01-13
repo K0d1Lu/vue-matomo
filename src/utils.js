@@ -1,5 +1,5 @@
 export function getMatomo () {
-  return window.Piwik.getAsyncTracker()
+  return window.Piwik.getAsyncTrackers()
 }
 
 export function loadScript (trackerScript) {
