@@ -37,7 +37,9 @@ function trackMatomoSiteSearch (options, { keyword, category, resultsCount }) {
 
   options.debug && console.debug('[vue-matomo] Site Search ' + keyword)
 
-  Matomo.trackSiteSearch(keyword, category, resultsCount)
+  Matomo.forEach((tracker) => {
+    tracker.trackSiteSearch(keyword, category, resultsCount)
+  })
 }
 
 function trackMatomoPageView (options, to, from) {
@@ -65,23 +67,30 @@ function trackMatomoPageView (options, to, from) {
   if (referrerUrl) {
     Matomo.forEach((tracker) => {
       tracker.setReferrerUrl(referrerUrl)
-    });
+    })
   }
   if (url) {
     Matomo.forEach((tracker) => {
       tracker.setCustomUrl(url)
-    });
+    })
   }
 
   Matomo.forEach((tracker) => {
     tracker.trackPageView(title)
-  });
+  })
 }
 
 function initMatomo (Vue, options) {
   const Matomo = getMatomo()
 
   const version = Number(Vue.version.split('.')[0])
+
+  // May need prototype.bind
+  Matomo[0].allTrackers = function (func, ...args) {
+    Matomo.forEach((tracker) => {
+      tracker[func](...args)
+    })
+  }
 
   if (version > 2) {
     Vue.config.globalProperties.$piwik = Matomo[0]
@@ -110,7 +119,7 @@ function initMatomo (Vue, options) {
       if (options.enableLinkTracking) {
         Matomo.forEach((tracker) => {
           tracker.enableLinkTracking()
-        });
+        })
       }
     })
   }
